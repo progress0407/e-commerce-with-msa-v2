@@ -1,0 +1,18 @@
+server.port: 8761
+
+spring:
+  application.name: eureka
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+
+# Spring Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, beans, health, info
