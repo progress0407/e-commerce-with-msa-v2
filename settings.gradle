@@ -1,1 +1,5 @@
 rootProject.name = 'shop'
+
+include 'eureka',
+        'api-gateway'
+

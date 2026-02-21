@@ -1,0 +1,28 @@
+server.port: 8000
+
+spring:
+  application.name: api-gateway
+  main.web-application-type: reactive  # 내장 서버를 netty로 (tomcat이 기본 내장설정일때 사용)
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+#    lease-expiration-duration-in-seconds: 1
+
+  client:
+    enabled: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 3
+
+# Spring Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, beans, health, info
+
+constant:
+  test.value: something-001
