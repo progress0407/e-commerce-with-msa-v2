@@ -1,5 +1,5 @@
 rootProject.name = 'shop'
 
 include 'eureka',
-        'api-gateway'
-
+        'api-gateway',
+        'item'
