@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.Getter;
 
 @Entity
 @Table(
@@ -15,6 +16,7 @@ import jakarta.persistence.UniqueConstraint;
                 @UniqueConstraint(name = "unique__item__name_size", columnNames = {"name", "size"})
         }
 )
+@Getter
 public class ItemEntity {
 
     @Id
@@ -71,26 +73,6 @@ public class ItemEntity {
         if (stockQuantity - orderQuantity < 0) {
             throw new IllegalStateException("Not enough stock quantity for the requested order quantity.");
         }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getSize() {
-        return size;
-    }
-
-    public int getPrice() {
-        return price;
-    }
-
-    public int getStockQuantity() {
-        return stockQuantity;
     }
 
     @Override
