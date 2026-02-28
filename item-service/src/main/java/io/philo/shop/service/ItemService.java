@@ -20,7 +20,7 @@ public class ItemService {
     private final ItemRepository itemRepository;
 
     @Transactional
-    public Long registerItem(String name, String size, int price, int availableQuantity) {
+    public Long addItem(String name, String size, int price, int availableQuantity) {
         ItemEntity entity = new ItemEntity(name, size, price, availableQuantity);
         itemRepository.save(entity);
         return entity.getId();
@@ -47,5 +47,11 @@ public class ItemService {
             dtos.add(new ItemInternalResponseDto(item.getId(), item.getName(), item.getSize(), item.getPrice()));
         }
         return dtos;
+    }
+
+    @Transactional
+    public void deleteItem(Long itemId) {
+        itemRepository.findById(itemId)
+                .ifPresent(itemRepository::delete);
     }
 }
