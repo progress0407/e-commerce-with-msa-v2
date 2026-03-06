@@ -2,8 +2,7 @@ package io.philo.shop.presentation;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,19 +18,18 @@ import io.philo.shop.dto.ItemCreateRequest;
 import io.philo.shop.dto.ItemResponse;
 import io.philo.shop.dto.ItemResponses;
 import io.philo.shop.dto.ResourceCreateResponse;
+import io.philo.shop.entity.ItemEntity;
 import io.philo.shop.service.ItemService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/items")
+@RequiredArgsConstructor
+@Slf4j
 public class ItemController {
 
-    private static final Logger log = LoggerFactory.getLogger(ItemController.class);
-
     private final ItemService itemService;
-
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -47,8 +45,11 @@ public class ItemController {
 
     @GetMapping
     public ItemResponses list(@RequestParam(name = "ids", required = false) List<Long> itemIds) {
-        List<ItemResponse> items = itemService.findItems(itemIds);
-        return new ItemResponses(items);
+        List<ItemEntity> items = itemService.findItems(itemIds);
+        List<ItemResponse> itemResponses = items.stream()
+            .map(ItemResponse::new)
+            .toList();
+        return new ItemResponses(itemResponses);
     }
 
     @DeleteMapping("/{id}")

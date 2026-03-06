@@ -3,6 +3,19 @@ server.port: 8081
 spring:
   application:
     name: ITEM-SERVICE
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: item-stock-consumer-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: io.philo.shop.messaging
+        spring.json.value.default.type: io.philo.shop.messaging.OrderCreatedEvent
+        spring.json.use.type.headers: false
+    listener:
+      missing-topics-fatal: false
 
 eureka:
   instance:
@@ -15,3 +28,8 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
     registry-fetch-interval-seconds: 3
+
+app:
+  kafka:
+    topic:
+      order-created: order.created.v1

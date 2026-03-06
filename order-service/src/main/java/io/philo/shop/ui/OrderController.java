@@ -1,5 +1,9 @@
 package io.philo.shop.ui;
 
+import java.util.List;
+import java.util.stream.Stream;
+
+import org.hibernate.boot.jaxb.mapping.GenerationTiming;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,9 +14,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.philo.shop.application.OrderService;
+import io.philo.shop.domain.OrderEntity;
 import io.philo.shop.dto.ResourceCreateResponse;
 import io.philo.shop.dto.web.OrderCreateRequest;
 import io.philo.shop.dto.web.OrderDetailResponse;
+import io.philo.shop.dto.web.OrderListResponse;
 import io.philo.shop.dto.web.OrderListResponses;
 import io.philo.shop.query.OrderQuery;
 import lombok.RequiredArgsConstructor;
@@ -34,11 +40,16 @@ public class OrderController {
 
     @GetMapping
     public OrderListResponses list() {
-        return orderQuery.list();
+		var savedItems = orderQuery.list()
+            .stream()
+            .map(OrderListResponse::new)
+            .toList();
+        return new OrderListResponses(savedItems);
     }
 
     @GetMapping("/{id}")
     public OrderDetailResponse detail(@PathVariable("id") Long id) {
-        return orderQuery.detail(id);
+        OrderEntity orderEntity = orderQuery.detail(id);
+        return new OrderDetailResponse(orderEntity);
     }
 }
