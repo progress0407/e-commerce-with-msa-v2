@@ -6,10 +6,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.philo.OrderCreatedEvent;
 import io.philo.shop.domain.OrderEntity;
 import io.philo.shop.domain.OrderLineItemEntity;
 import io.philo.shop.dto.web.OrderLineRequestDto;
-import io.philo.shop.messaging.OrderCreatedEvent;
 import io.philo.shop.messaging.OrderEventProducer;
 import io.philo.shop.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class OrderService {
     public Long order(List<OrderLineRequestDto> orderLineDtos) {
 
         OrderEntity orderEntity = createOrder(orderLineDtos);
-        orderRepository.save(orderEntity);
+        // orderRepository.save(orderEntity);
         orderEventProducer.publishOrderCreated(createOrderCreatedEvent(orderEntity));
 
         return orderEntity.getId();

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import io.philo.OrderCreatedEvent;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor

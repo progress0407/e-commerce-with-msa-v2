@@ -2,6 +2,7 @@ package io.philo.shop.messaging;
 
 import java.util.List;
 
+import io.philo.OrderCreatedEvent;
 import io.philo.shop.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +21,11 @@ public class OrderEventConsumer {
         List<OrderCreatedEvent.OrderLine> orderLines = event.orderLines();
 
         if (orderLines == null || orderLines.isEmpty()) {
-            log.info("Order-created event has no order lines. orderId={}", event.orderId());
+            log.info("주문 생성 이벤트에 주문 라인이 없습니다. orderId={}", event.orderId());
             return;
         }
 
         itemService.decreaseStockByOrder(orderLines);
-        log.info("Handled order-created event. orderId={}, orderLineCount={}", event.orderId(), orderLines.size());
+        log.info("주문 생성 이벤트를 처리했습니다. orderId={}, orderLineCount={}", event.orderId(), orderLines.size());
     }
 }

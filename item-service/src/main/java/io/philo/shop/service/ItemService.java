@@ -9,10 +9,10 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.philo.OrderCreatedEvent;
 import io.philo.shop.dto.ItemInternalResponseDto;
 import io.philo.shop.dto.ItemResponse;
 import io.philo.shop.entity.ItemEntity;
-import io.philo.shop.messaging.OrderCreatedEvent;
 import io.philo.shop.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 

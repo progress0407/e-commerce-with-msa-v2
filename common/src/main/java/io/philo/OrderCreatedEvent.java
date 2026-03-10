@@ -1,4 +1,4 @@
-package io.philo.shop.messaging;
+package io.philo;
 
 import java.util.List;
 

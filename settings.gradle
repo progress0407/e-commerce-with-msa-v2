@@ -3,4 +3,6 @@ rootProject.name = 'shop'
 include 'eureka',
         'api-gateway',
         'item-service',
-        'order-service'
+        'order-service',
+
+        'common'
