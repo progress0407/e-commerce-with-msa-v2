@@ -9,10 +9,11 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.philo.OrderCreatedEvent;
+import io.philo.shop.OrderCreatedEvent;
 import io.philo.shop.dto.ItemInternalResponseDto;
-import io.philo.shop.dto.ItemResponse;
 import io.philo.shop.entity.ItemEntity;
+import io.philo.shop.exception.InvalidOrderQuantityException;
+import io.philo.shop.exception.ItemNotFoundForOrderException;
 import io.philo.shop.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -72,7 +73,7 @@ public class ItemService {
     private static void validateOrderLineEvent(List<OrderCreatedEvent.OrderLine> orderLines) {
         for (OrderCreatedEvent.OrderLine orderLine : orderLines) {
             if (orderLine.quantity() <= 0) {
-                throw new IllegalArgumentException("주문 수량은 양수여야 합니다. 상품 ID=" + orderLine.itemId());
+                throw new InvalidOrderQuantityException(orderLine.itemId(), orderLine.quantity());
             }
         }
     }
@@ -81,7 +82,7 @@ public class ItemService {
         for (Map.Entry<Long, Integer> itemIdToDecreaseQuantity : requestItemIdToDecreaseQuantities.entrySet()) {
             ItemEntity item = itemIdToEntity.get(itemIdToDecreaseQuantity.getKey());
             if (item == null) {
-                throw new IllegalArgumentException("상품을 찾을 수 없습니다.. 상품 ID=" + itemIdToDecreaseQuantity.getKey());
+                throw new ItemNotFoundForOrderException(itemIdToDecreaseQuantity.getKey());
             }
             item.decreaseStockQuantity(itemIdToDecreaseQuantity.getValue());
         }

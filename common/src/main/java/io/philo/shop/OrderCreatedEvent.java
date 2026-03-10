@@ -1,4 +1,4 @@
-package io.philo;
+package io.philo.shop;
 
 import java.util.List;
 

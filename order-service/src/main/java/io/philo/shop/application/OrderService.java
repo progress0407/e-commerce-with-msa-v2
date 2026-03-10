@@ -6,17 +6,20 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.philo.OrderCreatedEvent;
+import io.philo.shop.OrderCreatedEvent;
+import io.philo.shop.constant.OrderStatus;
 import io.philo.shop.domain.OrderEntity;
 import io.philo.shop.domain.OrderLineItemEntity;
 import io.philo.shop.dto.web.OrderLineRequestDto;
 import io.philo.shop.messaging.OrderEventProducer;
 import io.philo.shop.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -25,11 +28,24 @@ public class OrderService {
     @Transactional
     public Long order(List<OrderLineRequestDto> orderLineDtos) {
 
-        OrderEntity orderEntity = createOrder(orderLineDtos);
-        // orderRepository.save(orderEntity);
-        orderEventProducer.publishOrderCreated(createOrderCreatedEvent(orderEntity));
+		var orderEntity = orderRepository.save(createOrder(orderLineDtos));
+		var orderCreatedEvent = createOrderCreatedEvent(orderEntity);
+        orderEventProducer.publishOrderCreated(orderCreatedEvent);
 
         return orderEntity.getId();
+    }
+
+    @Transactional
+    public void cancelOrder(Long orderId) {
+        OrderEntity orderEntity = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("롤백할 주문을 찾을 수 없습니다. orderId=" + orderId));
+
+        if (orderEntity.getOrderStatus() == OrderStatus.CANCEL) {
+            log.info("이미 주문이 취소되었습니다.");
+            return;
+        }
+
+        orderEntity.completeToCanceled();
     }
 
     private OrderEntity createOrder(List<OrderLineRequestDto> orderLineDtos) {

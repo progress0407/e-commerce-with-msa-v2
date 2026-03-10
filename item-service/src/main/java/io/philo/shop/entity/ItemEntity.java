@@ -1,5 +1,6 @@
 package io.philo.shop.entity;
 
+import io.philo.shop.exception.InsufficientStockException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -71,7 +72,7 @@ public class ItemEntity {
 
     private void validateCanDecrease(int orderQuantity) {
         if (stockQuantity - orderQuantity < 0) {
-            throw new IllegalStateException("주문수량에 비해 상품의 재고수량이 충분하지 않습니다.");
+            throw new InsufficientStockException(this.id, orderQuantity, this.stockQuantity);
         }
     }
 
