@@ -12,6 +12,7 @@ spring:
       properties:
         spring.json.trusted.packages: io.philo.shop
     listener:
+      ack-mode: record
       missing-topics-fatal: false
 
 app:
@@ -19,3 +20,4 @@ app:
     topic:
       order-created: order.created.v1
       order-canceled: order.canceled.v1
+      order-canceled-dlt: order.canceled.v1.DLT
