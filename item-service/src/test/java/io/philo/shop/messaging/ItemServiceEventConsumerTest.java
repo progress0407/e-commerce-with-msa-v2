@@ -19,16 +19,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class OrderEventConsumerTest {
+class ItemServiceEventConsumerTest {
 
     @Mock
     private ItemService itemService;
 
     @Mock
-    private OrderCancelProducer orderCancelProducer;
+    private ItemServiceEventProducer orderCancelProducer;
 
     @InjectMocks
-    private OrderEventConsumer orderEventConsumer;
+    private ItemServiceEventConsumer itemServiceEventConsumer;
 
     @Test
     void consumeOrderCreated_publishesCanceledEventWhenStockIsInsufficient() {
@@ -38,7 +38,7 @@ class OrderEventConsumerTest {
                 .when(itemService)
                 .decreaseStockByOrder(orderLines);
 
-        orderEventConsumer.consumeOrderCreated(event);
+        itemServiceEventConsumer.consumeOrderCreated(event);
 
         ArgumentCaptor<OrderCanceledEvent> captor =
                 ArgumentCaptor.forClass(OrderCanceledEvent.class);
@@ -54,7 +54,7 @@ class OrderEventConsumerTest {
         List<OrderCreatedEvent.OrderLine> orderLines = List.of(new OrderCreatedEvent.OrderLine(10L, 1));
         OrderCreatedEvent event = new OrderCreatedEvent(100L, orderLines);
 
-        orderEventConsumer.consumeOrderCreated(event);
+        itemServiceEventConsumer.consumeOrderCreated(event);
 
         verify(itemService).decreaseStockByOrder(orderLines);
         verifyNoInteractions(orderCancelProducer);
@@ -68,7 +68,7 @@ class OrderEventConsumerTest {
                 .when(itemService)
                 .decreaseStockByOrder(orderLines);
 
-        orderEventConsumer.consumeOrderCreated(event);
+        itemServiceEventConsumer.consumeOrderCreated(event);
 
         ArgumentCaptor<OrderCanceledEvent> captor = ArgumentCaptor.forClass(OrderCanceledEvent.class);
         verify(orderCancelProducer).publishOrderCanceled(captor.capture());
@@ -84,7 +84,7 @@ class OrderEventConsumerTest {
                 .when(itemService)
                 .decreaseStockByOrder(orderLines);
 
-        orderEventConsumer.consumeOrderCreated(event);
+        itemServiceEventConsumer.consumeOrderCreated(event);
 
         ArgumentCaptor<OrderCanceledEvent> captor = ArgumentCaptor.forClass(OrderCanceledEvent.class);
         verify(orderCancelProducer).publishOrderCanceled(captor.capture());

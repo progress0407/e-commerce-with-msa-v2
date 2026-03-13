@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OrderEventConsumer {
+public class ItemServiceEventConsumer {
 
     private final ItemService itemService;
-    private final OrderCancelProducer orderCancelProducer;
+    private final ItemServiceEventProducer itemServiceEventProducer;
 
     @KafkaListener(topics = "${app.kafka.topic.order-created}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeOrderCreated(OrderCreatedEvent event) {
@@ -33,7 +33,7 @@ public class OrderEventConsumer {
             log.info("주문 생성 이벤트를 처리했습니다. orderId={}, orderLineCount={}", event.orderId(), orderLines.size());
         } catch (OrderCancelTriggerException ex) {
 			var orderCanceledEvent = new OrderCanceledEvent(event.orderId(), ex.getItemId(), ex.getMessage());
-            orderCancelProducer.publishOrderCanceled(orderCanceledEvent);
+            itemServiceEventProducer.publishOrderCanceled(orderCanceledEvent);
             log.warn("주문 롤백 대상 예외로 롤백 이벤트를 발행했습니다. orderId={}, itemId={}", event.orderId(), ex.getItemId());
         }
 

@@ -17,3 +17,8 @@ eureka:
     fetch-registry: true
     register-with-eureka: true
     registry-fetch-interval-seconds: 3
+
+app:
+  manual:
+    exception:
+      type: "ItemNotFoundForOrderException"
