@@ -4,17 +4,27 @@ import java.util.UUID;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import io.philo.shop.PaymentCompletedEvent;
+import io.philo.shop.PaymentFailedEvent;
 import io.philo.shop.PaymentRequestedEvent;
 import io.philo.shop.dto.PaymentGatewayRequest;
 import io.philo.shop.dto.PaymentGatewayResponse;
+import io.philo.shop.messaging.PaymentServiceEventProducer;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+@Slf4j
 public class PaymentService {
 
-    public void process(PaymentRequestedEvent event) {
+    private final PaymentServiceEventProducer paymentServiceEventProducer;
+
+	@Transactional
+    public void executePayment(PaymentRequestedEvent event) {
 
         log.info("결제 요청 이벤트를 수신했습니다. orderId={}", event.orderId());
 
@@ -24,11 +34,25 @@ public class PaymentService {
 		var requestDto = getPaymentGatewayRequest(event);
         var responseDto = requestPaymentGateway(requestDto);
 
-		if (responseDto.isSuccess()) {
-			// order-service 에 결제가 성공했음을 알리는 이벤트 전송
-		} else {
-			// order-service, item-service에 결제가 실패했음을 알리는 이벤트 전송
-		}
+        if (responseDto.isSuccess()) {
+            paymentServiceEventProducer.publishPaymentCompleted(new PaymentCompletedEvent(
+                    event.orderId(),
+                    responseDto.paymentId(),
+                    event.totalAmount()
+            ));
+            log.info("결제가 성공했습니다. orderId={}, paymentId={}", event.orderId(), responseDto.paymentId());
+            return;
+        }
+
+        paymentServiceEventProducer.publishPaymentFailed(new PaymentFailedEvent(
+                event.orderId(),
+                responseDto.paymentId(),
+                event.totalAmount(),
+                responseDto.resultCode(),
+                responseDto.resultMessage()
+        ));
+        log.warn("결제가 실패했습니다. orderId={}, paymentId={}, resultCode={}, message={}",
+                event.orderId(), responseDto.paymentId(), responseDto.resultCode(), responseDto.resultMessage());
     }
 
 	private PaymentGatewayResponse requestPaymentGateway(PaymentGatewayRequest requestDto) {

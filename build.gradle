@@ -104,11 +104,13 @@ project(':order-service') {
 	}
 }
 
-project(':payment') {
+project(':payment-service') {
 	dependencies {
 		implementation project(':common')
 		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 		implementation 'org.springframework.boot:spring-boot-starter-kafka'
+		runtimeOnly 'com.h2database:h2'
 		implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	}
 }

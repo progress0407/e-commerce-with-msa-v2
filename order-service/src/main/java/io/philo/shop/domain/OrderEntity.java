@@ -79,6 +79,10 @@ public class OrderEntity extends BaseEntity {
         return this.orderStatus == OrderStatus.FAIL;
     }
 
+    public boolean isCancel() {
+        return this.orderStatus == OrderStatus.CANCEL;
+    }
+
     public static OrderEntity empty() {
         return new OrderEntity();
     }

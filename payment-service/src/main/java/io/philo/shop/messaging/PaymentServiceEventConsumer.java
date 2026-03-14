@@ -11,12 +11,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PaymentRequestedConsumer {
+public class PaymentServiceEventConsumer {
 
     private final PaymentService paymentService;
 
     @KafkaListener(topics = "${app.kafka.topic.payment-requested}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumePaymentRequested(PaymentRequestedEvent event) {
-        paymentService.process(event);
+        paymentService.executePayment(event);
     }
 }

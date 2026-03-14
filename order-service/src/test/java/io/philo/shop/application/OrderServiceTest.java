@@ -50,4 +50,22 @@ class OrderServiceTest {
                 .isInstanceOf(OrderNotFoundForCancelException.class)
                 .hasMessageContaining("orderId=1");
     }
+
+    @Test
+    void completeOrder_marksOrderAsSuccess() {
+        OrderEntity orderEntity = OrderEntity.empty();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(orderEntity));
+
+        orderService.completeOrder(1L);
+
+        assertThat(orderEntity.getOrderStatus()).isEqualTo(OrderStatus.SUCCESS);
+    }
+
+    @Test
+    void completeOrder_doesNothingWhenOrderDoesNotExist() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatCode(() -> orderService.completeOrder(1L))
+                .doesNotThrowAnyException();
+    }
 }

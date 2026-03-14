@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j

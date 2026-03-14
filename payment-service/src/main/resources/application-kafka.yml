@@ -1,6 +1,9 @@
 spring:
   kafka:
     bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
       group-id: payment-simulation-group
       auto-offset-reset: earliest
@@ -15,3 +18,5 @@ app:
   kafka:
     topic:
       payment-requested: payment.requested.v1
+      payment-completed: payment.completed.v1
+      payment-failed: payment.failed.v1

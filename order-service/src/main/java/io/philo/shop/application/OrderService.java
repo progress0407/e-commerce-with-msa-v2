@@ -40,8 +40,7 @@ public class OrderService {
 
     @Transactional
     public void cancelOrder(Long orderId) {
-
-        OrderEntity orderEntity = orderRepository.findById(orderId)
+		var orderEntity = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundForCancelException(orderId));
 
         if (OrderStatus.CANCEL == orderEntity.getOrderStatus()) {
@@ -52,13 +51,28 @@ public class OrderService {
         orderEntity.completeToCanceled();
     }
 
+    @Transactional
+    public void completeOrder(Long orderId) {
+		var orderEntity = orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundForCancelException(orderId));
+        if (orderEntity.isSuccess()) {
+            log.info("이미 주문이 완료되었습니다. orderId={}", orderId);
+            return;
+        }
+        else if (orderEntity.isCancel()) {
+            log.warn("취소된 주문은 완료 처리할 수 없습니다. orderId={}", orderId);
+            return;
+        }
+        orderEntity.completeToSuccess();
+    }
+
     private OrderEntity createOrder(List<OrderLineRequestDto> orderLineDtos) {
         List<OrderLineItemEntity> orderItems = toEntities(orderLineDtos);
         return new OrderEntity(orderItems);
     }
 
     private List<OrderLineItemEntity> toEntities(List<OrderLineRequestDto> orderLineDtos) {
-        List<OrderLineItemEntity> entities = new ArrayList<>();
+        var entities = new ArrayList<>();
 
         if (orderLineDtos == null) {
             return entities;
@@ -83,7 +97,8 @@ public class OrderService {
     }
 
     private OrderCreatedEvent createOrderCreatedEvent(OrderEntity orderEntity) {
-        List<OrderCreatedEvent.OrderLine> orderLines = orderEntity.getOrderLineItemEntities().stream()
+        List<OrderCreatedEvent.OrderLine> orderLines =
+            orderEntity.getOrderLineItemEntities().stream()
                 .map(orderLine -> new OrderCreatedEvent.OrderLine(orderLine.getItemId(), orderLine.getOrderedQuantity()))
                 .toList();
 

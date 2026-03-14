@@ -21,3 +21,4 @@ app:
       order-created: order.created.v1
       order-canceled: order.canceled.v1
       order-canceled-dlt: order.canceled.v1.DLT
+      payment-completed: payment.completed.v1
