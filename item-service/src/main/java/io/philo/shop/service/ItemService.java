@@ -17,10 +17,13 @@ import io.philo.shop.exception.ItemNotFoundForOrderException;
 import io.philo.shop.repository.ItemRepository;
 import io.philo.shop.testsupport.ManualItemServiceExceptionTrigger;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class ItemService {
 
     private final ItemRepository itemRepository;

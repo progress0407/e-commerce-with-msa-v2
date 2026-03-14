@@ -6,38 +6,33 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.philo.shop.exception.OrderNotFoundForCancelException;
+
 class ManualOrderServiceExceptionTriggerTest {
 
     @Test
-    void throwIfConfigured_throwsIllegalArgumentException() {
-        ManualOrderServiceExceptionTrigger trigger = createTrigger("ILLEGAL_ARGUMENT");
+    void throwIfConfigured_throwsOrderNotFoundExceptionWhenSimpleNameIsConfigured() {
+        ManualOrderServiceExceptionTrigger trigger = createTrigger("OrderNotFoundForCancelException");
 
         assertThatThrownBy(trigger::throwIfConfigured)
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(OrderNotFoundForCancelException.class);
     }
 
     @Test
-    void throwIfConfigured_throwsIllegalStateException() {
-        ManualOrderServiceExceptionTrigger trigger = createTrigger("IllegalStateException");
+    void throwIfConfigured_throwsOrderNotFoundExceptionWhenFqcnIsConfigured() {
+        ManualOrderServiceExceptionTrigger trigger = createTrigger("io.philo.shop.exception.OrderNotFoundForCancelException");
 
         assertThatThrownBy(trigger::throwIfConfigured)
-            .isInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
-    void throwIfConfigured_throwsRuntimeException() {
-        ManualOrderServiceExceptionTrigger trigger = createTrigger("java.lang.RuntimeException");
-
-        assertThatThrownBy(trigger::throwIfConfigured)
-            .isInstanceOf(RuntimeException.class);
+            .isInstanceOf(OrderNotFoundForCancelException.class);
     }
 
     @Test
     void throwIfConfigured_acceptsLegacyClassToStringFormat() {
-        ManualOrderServiceExceptionTrigger trigger = createTrigger("class java.lang.IllegalArgumentException");
+        ManualOrderServiceExceptionTrigger trigger =
+            createTrigger("class io.philo.shop.exception.OrderNotFoundForCancelException");
 
         assertThatThrownBy(trigger::throwIfConfigured)
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(OrderNotFoundForCancelException.class);
     }
 
     @Test

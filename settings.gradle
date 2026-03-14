@@ -4,5 +4,6 @@ include 'eureka',
         'api-gateway',
         'item-service',
         'order-service',
+        'payment',
 
         'common'

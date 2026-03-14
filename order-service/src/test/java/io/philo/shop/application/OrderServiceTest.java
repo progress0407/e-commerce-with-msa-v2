@@ -35,7 +35,7 @@ class OrderServiceTest {
     @Test
     void cancelOrder_marksOrderAsCanceled() {
         OrderEntity orderEntity = OrderEntity.empty();
-        when(orderRepository.findById(2L)).thenReturn(Optional.of(orderEntity));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(orderEntity));
 
         orderService.cancelOrder(1L);
 
@@ -44,7 +44,7 @@ class OrderServiceTest {
 
     @Test
     void cancelOrder_throwsCustomExceptionWhenOrderDoesNotExist() {
-        when(orderRepository.findById(2L)).thenReturn(Optional.empty());
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> orderService.cancelOrder(1L))
                 .isInstanceOf(OrderNotFoundForCancelException.class)

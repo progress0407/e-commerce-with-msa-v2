@@ -1,11 +1,8 @@
 spring:
   kafka:
     bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
-      group-id: item-stock-consumer-group
+      group-id: payment-simulation-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -17,6 +14,4 @@ spring:
 app:
   kafka:
     topic:
-      order-created: order.created.v1
-      order-canceled: order.canceled.v1
       payment-requested: payment.requested.v1

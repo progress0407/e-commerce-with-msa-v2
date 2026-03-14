@@ -28,6 +28,7 @@ public class GatewayRouteConfig {
                 .route(r -> route(r, "USER-SERVICE", "/users"))
                 .route(r -> route(r, "ITEM-SERVICE", "/items", POST, GET))
                 .route(r -> route(r, "ORDER-SERVICE", "/orders", POST, GET))
+                .route(r -> route(r, "PAYMENT-SERVICE", "/payments", POST, GET))
                 .build();
     }
 

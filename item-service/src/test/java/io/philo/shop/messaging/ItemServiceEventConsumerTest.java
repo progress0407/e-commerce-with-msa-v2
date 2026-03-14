@@ -7,6 +7,7 @@ import java.util.List;
 
 import io.philo.shop.OrderCanceledEvent;
 import io.philo.shop.OrderCreatedEvent;
+import io.philo.shop.PaymentRequestedEvent;
 import io.philo.shop.exception.InvalidOrderQuantityException;
 import io.philo.shop.exception.ItemNotFoundForOrderException;
 import io.philo.shop.exception.InsufficientStockException;
@@ -43,6 +44,7 @@ class ItemServiceEventConsumerTest {
         ArgumentCaptor<OrderCanceledEvent> captor =
                 ArgumentCaptor.forClass(OrderCanceledEvent.class);
         verify(orderCancelProducer).publishOrderCanceled(captor.capture());
+        verify(orderCancelProducer, never()).publishPaymentRequested(any());
 
         assertThat(captor.getValue().orderId()).isEqualTo(100L);
         assertThat(captor.getValue().itemId()).isEqualTo(10L);
@@ -57,7 +59,8 @@ class ItemServiceEventConsumerTest {
         itemServiceEventConsumer.consumeOrderCreated(event);
 
         verify(itemService).decreaseStockByOrder(orderLines);
-        verifyNoInteractions(orderCancelProducer);
+        verify(orderCancelProducer).publishPaymentRequested(new PaymentRequestedEvent(100L));
+        verify(orderCancelProducer, never()).publishOrderCanceled(any());
     }
 
     @Test
@@ -72,6 +75,7 @@ class ItemServiceEventConsumerTest {
 
         ArgumentCaptor<OrderCanceledEvent> captor = ArgumentCaptor.forClass(OrderCanceledEvent.class);
         verify(orderCancelProducer).publishOrderCanceled(captor.capture());
+        verify(orderCancelProducer, never()).publishPaymentRequested(any());
         assertThat(captor.getValue().itemId()).isEqualTo(10L);
         assertThat(captor.getValue().reason()).contains("주문 수량은 양수여야 합니다.");
     }
@@ -88,6 +92,7 @@ class ItemServiceEventConsumerTest {
 
         ArgumentCaptor<OrderCanceledEvent> captor = ArgumentCaptor.forClass(OrderCanceledEvent.class);
         verify(orderCancelProducer).publishOrderCanceled(captor.capture());
+        verify(orderCancelProducer, never()).publishPaymentRequested(any());
         assertThat(captor.getValue().itemId()).isEqualTo(999L);
         assertThat(captor.getValue().reason()).contains("상품을 찾을 수 없습니다.");
     }

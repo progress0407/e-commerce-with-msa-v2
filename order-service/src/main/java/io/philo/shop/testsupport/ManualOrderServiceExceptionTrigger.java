@@ -37,7 +37,8 @@ public class ManualOrderServiceExceptionTrigger {
 
             return switch (normalized) {
                 case "OrderNotFoundForCancelException",
-                     "io.philo.shop.exception.OrderNotFoundForCancelException" -> ORDER_NOT_FOUND_EXCEPTION;
+                     "io.philo.shop.exception.OrderNotFoundForCancelException",
+                     "class io.philo.shop.exception.OrderNotFoundForCancelException" -> ORDER_NOT_FOUND_EXCEPTION;
                 default -> NONE;
             };
         }
