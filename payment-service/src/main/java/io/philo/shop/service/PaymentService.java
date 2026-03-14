@@ -1,5 +1,7 @@
 package io.philo.shop.service;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import org.jspecify.annotations.NonNull;
@@ -49,7 +51,8 @@ public class PaymentService {
                 responseDto.paymentId(),
                 event.totalAmount(),
                 responseDto.resultCode(),
-                responseDto.resultMessage()
+                responseDto.resultMessage(),
+                toPaymentFailedOrderLines(event.orderLines())
         ));
         log.warn("결제가 실패했습니다. orderId={}, paymentId={}, resultCode={}, message={}",
                 event.orderId(), responseDto.paymentId(), responseDto.resultCode(), responseDto.resultMessage());
@@ -80,5 +83,16 @@ public class PaymentService {
             event.totalAmount(),
             "KRW"
         );
+    }
+
+    private static List<PaymentFailedEvent.OrderLine> toPaymentFailedOrderLines(
+            List<PaymentRequestedEvent.OrderLine> orderLines
+    ) {
+        if (orderLines == null || orderLines.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return orderLines.stream()
+                .map(orderLine -> new PaymentFailedEvent.OrderLine(orderLine.itemId(), orderLine.quantity()))
+                .toList();
     }
 }

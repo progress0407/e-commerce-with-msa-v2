@@ -54,7 +54,7 @@ public class OrderService {
     @Transactional
     public void completeOrder(Long orderId) {
 		var orderEntity = orderRepository.findById(orderId)
-            .orElseThrow(() -> new OrderNotFoundForCancelException(orderId));
+	            .orElseThrow(() -> new OrderNotFoundForCancelException(orderId));
         if (orderEntity.isSuccess()) {
             log.info("이미 주문이 완료되었습니다. orderId={}", orderId);
             return;
@@ -66,13 +66,32 @@ public class OrderService {
         orderEntity.completeToSuccess();
     }
 
+    @Transactional
+    public void failOrder(Long orderId) {
+        var orderEntity = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundForCancelException(orderId));
+        if (orderEntity.isFail()) {
+            log.info("이미 주문이 실패 처리되었습니다. orderId={}", orderId);
+            return;
+        }
+        if (orderEntity.isCancel()) {
+            log.warn("취소된 주문은 실패 처리할 수 없습니다. orderId={}", orderId);
+            return;
+        }
+        if (orderEntity.isSuccess()) {
+            log.warn("이미 완료된 주문은 실패 처리할 수 없습니다. orderId={}", orderId);
+            return;
+        }
+        orderEntity.completeToFail();
+    }
+
     private OrderEntity createOrder(List<OrderLineRequestDto> orderLineDtos) {
         List<OrderLineItemEntity> orderItems = toEntities(orderLineDtos);
         return new OrderEntity(orderItems);
     }
 
     private List<OrderLineItemEntity> toEntities(List<OrderLineRequestDto> orderLineDtos) {
-        var entities = new ArrayList<>();
+        List<OrderLineItemEntity> entities = new ArrayList<>();
 
         if (orderLineDtos == null) {
             return entities;
@@ -102,6 +121,6 @@ public class OrderService {
                 .map(orderLine -> new OrderCreatedEvent.OrderLine(orderLine.getItemId(), orderLine.getOrderedQuantity()))
                 .toList();
 
-        return new OrderCreatedEvent(orderEntity.getId(), orderLines);
+        return new OrderCreatedEvent(orderEntity.getId(), orderEntity.getTotalOrderAmount(), orderLines);
     }
 }

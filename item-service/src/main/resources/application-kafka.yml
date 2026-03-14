@@ -20,3 +20,4 @@ app:
       order-created: order.created.v1
       order-canceled: order.canceled.v1
       payment-requested: payment.requested.v1
+      payment-failed: payment.failed.v1

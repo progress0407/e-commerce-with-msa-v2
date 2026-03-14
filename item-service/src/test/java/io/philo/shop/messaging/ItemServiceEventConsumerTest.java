@@ -34,7 +34,7 @@ class ItemServiceEventConsumerTest {
     @Test
     void consumeOrderCreated_publishesCanceledEventWhenStockIsInsufficient() {
         List<OrderCreatedEvent.OrderLine> orderLines = List.of(new OrderCreatedEvent.OrderLine(10L, 3));
-        OrderCreatedEvent event = new OrderCreatedEvent(100L, orderLines);
+        OrderCreatedEvent event = new OrderCreatedEvent(100L, 30000, orderLines);
         doThrow(new InsufficientStockException(10L, 3, 1))
                 .when(itemService)
                 .decreaseStockByOrder(orderLines);
@@ -54,19 +54,23 @@ class ItemServiceEventConsumerTest {
     @Test
     void consumeOrderCreated_doesNotPublishCanceledEventWhenStockDecreaseSucceeds() {
         List<OrderCreatedEvent.OrderLine> orderLines = List.of(new OrderCreatedEvent.OrderLine(10L, 1));
-        OrderCreatedEvent event = new OrderCreatedEvent(100L, orderLines);
+        OrderCreatedEvent event = new OrderCreatedEvent(100L, 30000, orderLines);
 
         itemServiceEventConsumer.consumeOrderCreated(event);
 
         verify(itemService).decreaseStockByOrder(orderLines);
-        verify(orderCancelProducer).publishPaymentRequested(new PaymentRequestedEvent(100L));
+        verify(orderCancelProducer).publishPaymentRequested(new PaymentRequestedEvent(
+                100L,
+                30000,
+                List.of(new PaymentRequestedEvent.OrderLine(10L, 1))
+        ));
         verify(orderCancelProducer, never()).publishOrderCanceled(any());
     }
 
     @Test
     void consumeOrderCreated_publishesCanceledEventWhenOrderQuantityIsInvalid() {
         List<OrderCreatedEvent.OrderLine> orderLines = List.of(new OrderCreatedEvent.OrderLine(10L, 0));
-        OrderCreatedEvent event = new OrderCreatedEvent(100L, orderLines);
+        OrderCreatedEvent event = new OrderCreatedEvent(100L, 30000, orderLines);
         doThrow(new InvalidOrderQuantityException(10L, 0))
                 .when(itemService)
                 .decreaseStockByOrder(orderLines);
@@ -83,7 +87,7 @@ class ItemServiceEventConsumerTest {
     @Test
     void consumeOrderCreated_publishesCanceledEventWhenItemIsNotFound() {
         List<OrderCreatedEvent.OrderLine> orderLines = List.of(new OrderCreatedEvent.OrderLine(999L, 1));
-        OrderCreatedEvent event = new OrderCreatedEvent(100L, orderLines);
+        OrderCreatedEvent event = new OrderCreatedEvent(100L, 30000, orderLines);
         doThrow(new ItemNotFoundForOrderException(999L))
                 .when(itemService)
                 .decreaseStockByOrder(orderLines);

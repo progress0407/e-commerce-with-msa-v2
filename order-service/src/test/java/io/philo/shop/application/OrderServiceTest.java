@@ -65,7 +65,27 @@ class OrderServiceTest {
     void completeOrder_doesNothingWhenOrderDoesNotExist() {
         when(orderRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThatCode(() -> orderService.completeOrder(1L))
-                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> orderService.completeOrder(1L))
+                .isInstanceOf(OrderNotFoundForCancelException.class)
+                .hasMessageContaining("orderId=1");
+    }
+
+    @Test
+    void failOrder_marksOrderAsFail() {
+        OrderEntity orderEntity = OrderEntity.empty();
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(orderEntity));
+
+        orderService.failOrder(1L);
+
+        assertThat(orderEntity.getOrderStatus()).isEqualTo(OrderStatus.FAIL);
+    }
+
+    @Test
+    void failOrder_doesNothingWhenOrderDoesNotExist() {
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> orderService.failOrder(1L))
+                .isInstanceOf(OrderNotFoundForCancelException.class)
+                .hasMessageContaining("orderId=1");
     }
 }

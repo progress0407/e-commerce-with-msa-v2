@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.philo.shop.OrderCreatedEvent;
+import io.philo.shop.PaymentFailedEvent;
 import io.philo.shop.dto.ItemInternalResponseDto;
 import io.philo.shop.entity.ItemEntity;
 import io.philo.shop.exception.InvalidOrderQuantityException;
@@ -69,6 +70,15 @@ public class ItemService {
         validateAndDecreaseItemQuantity(itemIdToDecreaseQuantity, itemIdToEntity);
     }
 
+    @Transactional
+    public void restoreStockByPaymentFailure(List<PaymentFailedEvent.OrderLine> orderLines) {
+        validatePaymentFailedOrderLineEvent(orderLines);
+        Map<Long, Integer> itemIdToRestoreQuantity = convertItemIdToRestoreQuantity(orderLines);
+        List<ItemEntity> items = itemRepository.findAllByIdIn(itemIdToRestoreQuantity.keySet());
+        Map<Long, ItemEntity> itemIdToEntity = convertItemIdToEntity(items);
+        validateAndRestoreItemQuantity(itemIdToRestoreQuantity, itemIdToEntity);
+    }
+
     private static @NonNull Map<Long, ItemEntity> convertItemIdToEntity(List<ItemEntity> items) {
         return items.stream()
             .collect(toMap(ItemEntity::getId, item -> item));
@@ -76,6 +86,14 @@ public class ItemService {
 
     private static void validateOrderLineEvent(List<OrderCreatedEvent.OrderLine> orderLines) {
         for (OrderCreatedEvent.OrderLine orderLine : orderLines) {
+            if (orderLine.quantity() <= 0) {
+                throw new InvalidOrderQuantityException(orderLine.itemId(), orderLine.quantity());
+            }
+        }
+    }
+
+    private static void validatePaymentFailedOrderLineEvent(List<PaymentFailedEvent.OrderLine> orderLines) {
+        for (PaymentFailedEvent.OrderLine orderLine : orderLines) {
             if (orderLine.quantity() <= 0) {
                 throw new InvalidOrderQuantityException(orderLine.itemId(), orderLine.quantity());
             }
@@ -92,6 +110,16 @@ public class ItemService {
         }
     }
 
+    private static void validateAndRestoreItemQuantity(Map<Long, Integer> requestItemIdToRestoreQuantities, Map<Long, ItemEntity> itemIdToEntity) {
+        for (Map.Entry<Long, Integer> itemIdToRestoreQuantity : requestItemIdToRestoreQuantities.entrySet()) {
+            ItemEntity item = itemIdToEntity.get(itemIdToRestoreQuantity.getKey());
+            if (item == null) {
+                throw new ItemNotFoundForOrderException(itemIdToRestoreQuantity.getKey());
+            }
+            item.increaseStockQuantity(itemIdToRestoreQuantity.getValue());
+        }
+    }
+
     private static @NonNull Map<Long, Integer> convertItemIdToDecreaseQuantity(List<OrderCreatedEvent.OrderLine> orderLines) {
         return orderLines.stream()
             .collect(toMap(
@@ -99,5 +127,14 @@ public class ItemService {
                 OrderCreatedEvent.OrderLine::quantity,
                 Integer::sum
             ));
+    }
+
+    private static @NonNull Map<Long, Integer> convertItemIdToRestoreQuantity(List<PaymentFailedEvent.OrderLine> orderLines) {
+        return orderLines.stream()
+                .collect(toMap(
+                        PaymentFailedEvent.OrderLine::itemId,
+                        PaymentFailedEvent.OrderLine::quantity,
+                        Integer::sum
+                ));
     }
 }

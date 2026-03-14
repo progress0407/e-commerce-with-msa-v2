@@ -4,6 +4,7 @@ import java.util.List;
 
 public record OrderCreatedEvent(
         Long orderId,
+        int totalAmount,
         List<OrderLine> orderLines
 ) {
 

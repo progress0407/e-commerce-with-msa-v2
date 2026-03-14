@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.philo.shop.OrderCreatedEvent;
 import io.philo.shop.OrderCanceledEvent;
+import io.philo.shop.PaymentFailedEvent;
 import io.philo.shop.PaymentRequestedEvent;
 import io.philo.shop.exception.OrderCancelTriggerException;
 import io.philo.shop.service.ItemService;
@@ -32,11 +33,36 @@ public class ItemServiceEventConsumer {
         try {
             itemService.decreaseStockByOrder(orderLines);
             log.info("주문 생성 이벤트를 처리했습니다. orderId={}, orderLineCount={}", event.orderId(), orderLines.size());
-            itemServiceEventProducer.publishPaymentRequested(new PaymentRequestedEvent(event.orderId()));
+            itemServiceEventProducer.publishPaymentRequested(new PaymentRequestedEvent(
+                    event.orderId(),
+                    event.totalAmount(),
+                    toPaymentOrderLines(orderLines)
+            ));
         } catch (OrderCancelTriggerException ex) {
 			var orderCanceledEvent = new OrderCanceledEvent(event.orderId(), ex.getItemId(), ex.getMessage());
             itemServiceEventProducer.publishOrderCanceled(orderCanceledEvent);
-            log.warn("주문 롤백 대상 예외로 롤백 이벤트를 발행했습니다. orderId={}, itemId={}", event.orderId(), ex.getItemId());
+            log.warn("상품 재고 차감 중 예외가 발생하여 롤백 이벤트를 발행했습니다. orderId={}, itemId={}", event.orderId(), ex.getItemId());
         }
+    }
+
+    @KafkaListener(topics = "${app.kafka.topic.payment-failed}", groupId = "${spring.kafka.consumer.group-id}")
+    public void consumePaymentFailed(PaymentFailedEvent event) {
+        if (event.orderLines() == null || event.orderLines().isEmpty()) {
+            log.warn("복구할 주문 라인이 없어 재고 복구를 건너뜁니다. orderId={}, paymentId={}",
+                event.orderId(), event.paymentId());
+            return;
+        }
+
+        itemService.restoreStockByPaymentFailure(event.orderLines());
+        log.info("결제 실패로 재고를 복구했습니다. orderId={}, paymentId={}, lineCount={}",
+            event.orderId(),
+            event.paymentId(),
+            event.orderLines().size());
+    }
+
+    private static List<PaymentRequestedEvent.OrderLine> toPaymentOrderLines(List<OrderCreatedEvent.OrderLine> orderLines) {
+        return orderLines.stream()
+                .map(orderLine -> new PaymentRequestedEvent.OrderLine(orderLine.itemId(), orderLine.quantity()))
+                .toList();
     }
 }
