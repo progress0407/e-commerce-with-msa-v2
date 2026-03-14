@@ -1,7 +1,5 @@
-package io.philo.shop.support;
+package io.philo.shop.testsupport;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.context.annotation.Configuration;

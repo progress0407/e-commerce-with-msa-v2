@@ -1,6 +1,7 @@
 package io.philo.shop.messaging;
 
 import org.apache.kafka.common.TopicPartition;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,8 @@ import org.springframework.kafka.core.KafkaOperations;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
+
+import io.philo.shop.exception.OrderNotFoundForCancelException;
 
 @Configuration
 public class KafkaListenerErrorHandlerConfig {
@@ -17,18 +20,32 @@ public class KafkaListenerErrorHandlerConfig {
             KafkaOperations<Object, Object> kafkaOperations,
             @Value("${app.kafka.topic.order-canceled-dlt}") String orderCanceledDltTopic
     ) {
-        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
-                kafkaOperations,
-                (record, ex) -> new TopicPartition(orderCanceledDltTopic, record.partition())
+		var recoverer = createDeadLetterPublishingRecoverer(kafkaOperations, orderCanceledDltTopic);
+        var backOff = createBackOff();
+        var errorHandler = createDefaultErrorHandler(recoverer, backOff);
+        return errorHandler;
+    }
+
+    private static @NonNull DeadLetterPublishingRecoverer createDeadLetterPublishingRecoverer(KafkaOperations<Object, Object> kafkaOperations,
+        String orderCanceledDltTopic) {
+        return new DeadLetterPublishingRecoverer(
+            kafkaOperations,
+            (record, ex) -> new TopicPartition(orderCanceledDltTopic, record.partition())
         );
+    }
 
-        ExponentialBackOffWithMaxRetries backOff = new ExponentialBackOffWithMaxRetries(2);
-        backOff.setInitialInterval(1000L); // 1st retry
-        backOff.setMultiplier(2.0);        // exponential
-        backOff.setMaxInterval(2000L);     // 2nd retry
+    private static @NonNull ExponentialBackOffWithMaxRetries createBackOff() {
+        var backOff = new ExponentialBackOffWithMaxRetries(2);
+        backOff.setInitialInterval(1000L);
+        backOff.setMultiplier(2.0);
+        backOff.setMaxInterval(2000L);
+        return backOff;
+    }
 
-        // 2회 재시도(1초 -> 2초) 후 DLT 전송 (총 처리 시도 3회).
-        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, backOff);
+    private static @NonNull DefaultErrorHandler createDefaultErrorHandler(DeadLetterPublishingRecoverer recoverer,
+        ExponentialBackOffWithMaxRetries backOff) {
+        var errorHandler = new DefaultErrorHandler(recoverer, backOff);
+        errorHandler.addNotRetryableExceptions(OrderNotFoundForCancelException.class);
         errorHandler.addNotRetryableExceptions(IllegalArgumentException.class);
         return errorHandler;
     }

@@ -1,4 +1,4 @@
-package io.philo.shop.support;
+package io.philo.shop.testsupport;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -10,11 +10,11 @@ import io.philo.shop.exception.InsufficientStockException;
 import io.philo.shop.exception.InvalidOrderQuantityException;
 import io.philo.shop.exception.ItemNotFoundForOrderException;
 
-class ManualItemServiceExceptionInjectorTest {
+class ManualItemServiceExceptionTriggerTest {
 
     @Test
     void throwIfConfigured_throwsInvalidOrderQuantityException() {
-        ManualItemServiceExceptionInjector injector = createInjector("InvalidOrderQuantityException");
+        ManualItemServiceExceptionTrigger injector = createInjector("InvalidOrderQuantityException");
 
         assertThatThrownBy(injector::throwIfConfigured)
             .isInstanceOf(InvalidOrderQuantityException.class);
@@ -22,7 +22,7 @@ class ManualItemServiceExceptionInjectorTest {
 
     @Test
     void throwIfConfigured_throwsInsufficientStockException() {
-        ManualItemServiceExceptionInjector injector = createInjector("INSUFFICIENT_STOCK");
+        ManualItemServiceExceptionTrigger injector = createInjector("INSUFFICIENT_STOCK");
 
         assertThatThrownBy(injector::throwIfConfigured)
             .isInstanceOf(InsufficientStockException.class);
@@ -30,7 +30,7 @@ class ManualItemServiceExceptionInjectorTest {
 
     @Test
     void throwIfConfigured_throwsItemNotFoundException() {
-        ManualItemServiceExceptionInjector injector = createInjector("ItemNotFoundForOrderException");
+        ManualItemServiceExceptionTrigger injector = createInjector("ItemNotFoundForOrderException");
 
         assertThatThrownBy(injector::throwIfConfigured)
             .isInstanceOf(ItemNotFoundForOrderException.class);
@@ -38,7 +38,7 @@ class ManualItemServiceExceptionInjectorTest {
 
     @Test
     void throwIfConfigured_acceptsLegacyClassToStringFormat() {
-        ManualItemServiceExceptionInjector injector =
+        ManualItemServiceExceptionTrigger injector =
             createInjector("class io.philo.shop.exception.ItemNotFoundForOrderException");
 
         assertThatThrownBy(injector::throwIfConfigured)
@@ -47,7 +47,7 @@ class ManualItemServiceExceptionInjectorTest {
 
     @Test
     void throwIfConfigured_doesNothingWhenUnknownType() {
-        ManualItemServiceExceptionInjector injector = createInjector("UNKNOWN_TYPE");
+        ManualItemServiceExceptionTrigger injector = createInjector("UNKNOWN_TYPE");
 
         assertThatCode(injector::throwIfConfigured)
             .doesNotThrowAnyException();
@@ -55,14 +55,14 @@ class ManualItemServiceExceptionInjectorTest {
 
     @Test
     void throwIfConfigured_doesNothingWhenBlank() {
-        ManualItemServiceExceptionInjector injector = createInjector(" ");
+        ManualItemServiceExceptionTrigger injector = createInjector(" ");
 
         assertThatCode(injector::throwIfConfigured)
             .doesNotThrowAnyException();
     }
 
-    private static ManualItemServiceExceptionInjector createInjector(String configuredExceptionType) {
-        ManualItemServiceExceptionInjector injector = new ManualItemServiceExceptionInjector();
+    private static ManualItemServiceExceptionTrigger createInjector(String configuredExceptionType) {
+        ManualItemServiceExceptionTrigger injector = new ManualItemServiceExceptionTrigger();
         ReflectionTestUtils.setField(injector, "configuredExceptionType", configuredExceptionType);
         return injector;
     }

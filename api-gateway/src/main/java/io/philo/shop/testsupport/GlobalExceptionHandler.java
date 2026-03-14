@@ -1,4 +1,4 @@
-package io.philo.shop.support;
+package io.philo.shop.testsupport;
 
 import io.philo.shop.error.InAppException;
 import org.slf4j.Logger;

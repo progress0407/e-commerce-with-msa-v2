@@ -21,5 +21,5 @@ public class OrderCancelConsumer {
                 event.orderId(),
                 event.itemId(),
                 event.reason());
-    }
+   }
 }

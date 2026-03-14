@@ -15,7 +15,7 @@ import io.philo.shop.entity.ItemEntity;
 import io.philo.shop.exception.InvalidOrderQuantityException;
 import io.philo.shop.exception.ItemNotFoundForOrderException;
 import io.philo.shop.repository.ItemRepository;
-import io.philo.shop.support.ManualItemServiceExceptionInjector;
+import io.philo.shop.testsupport.ManualItemServiceExceptionTrigger;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class ItemService {
 
     private final ItemRepository itemRepository;
-    private final ManualItemServiceExceptionInjector manualItemServiceExceptionInjector;
+    private final ManualItemServiceExceptionTrigger manualItemServiceExceptionTrigger;
 
     @Transactional
     public Long addItem(String name, String size, int price, int availableQuantity) {
@@ -59,7 +59,7 @@ public class ItemService {
 
     @Transactional
     public void decreaseStockByOrder(List<OrderCreatedEvent.OrderLine> orderLines) {
-        manualItemServiceExceptionInjector.throwIfConfigured();
+        manualItemServiceExceptionTrigger.throwIfConfigured();
         validateOrderLineEvent(orderLines);
         Map<Long, Integer> itemIdToDecreaseQuantity = convertItemIdToDecreaseQuantity(orderLines);
         List<ItemEntity> items = itemRepository.findAllByIdIn(itemIdToDecreaseQuantity.keySet());

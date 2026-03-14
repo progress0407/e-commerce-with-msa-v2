@@ -11,8 +11,10 @@ import io.philo.shop.constant.OrderStatus;
 import io.philo.shop.domain.OrderEntity;
 import io.philo.shop.domain.OrderLineItemEntity;
 import io.philo.shop.dto.web.OrderLineRequestDto;
+import io.philo.shop.exception.OrderNotFoundForCancelException;
 import io.philo.shop.messaging.OrderEventProducer;
 import io.philo.shop.repository.OrderRepository;
+import io.philo.shop.testsupport.ManualOrderServiceExceptionTrigger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,6 +26,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderEventProducer orderEventProducer;
+    private final ManualOrderServiceExceptionTrigger manualOrderServiceExceptionTrigger;
 
     @Transactional
     public Long order(List<OrderLineRequestDto> orderLineDtos) {
@@ -37,10 +40,11 @@ public class OrderService {
 
     @Transactional
     public void cancelOrder(Long orderId) {
-        OrderEntity orderEntity = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("롤백할 주문을 찾을 수 없습니다. orderId=" + orderId));
 
-        if (orderEntity.getOrderStatus() == OrderStatus.CANCEL) {
+        OrderEntity orderEntity = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundForCancelException(orderId));
+
+        if (OrderStatus.CANCEL == orderEntity.getOrderStatus()) {
             log.info("이미 주문이 취소되었습니다.");
             return;
         }
