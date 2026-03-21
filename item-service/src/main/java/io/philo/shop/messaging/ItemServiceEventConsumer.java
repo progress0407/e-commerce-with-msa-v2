@@ -2,16 +2,17 @@ package io.philo.shop.messaging;
 
 import java.util.List;
 
-import io.philo.shop.OrderCreatedEvent;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+
 import io.philo.shop.OrderCanceledEvent;
+import io.philo.shop.OrderCreatedEvent;
 import io.philo.shop.PaymentFailedEvent;
 import io.philo.shop.PaymentRequestedEvent;
 import io.philo.shop.exception.OrderCancelTriggerException;
 import io.philo.shop.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -23,6 +24,11 @@ public class ItemServiceEventConsumer {
 
     @KafkaListener(topics = "${app.kafka.topic.order-created}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeOrderCreated(OrderCreatedEvent event) {
+        if (event == null) {
+            log.warn("order-created 이벤트가 null 입니다. 메시지를 무시합니다.");
+            return;
+        }
+
         List<OrderCreatedEvent.OrderLine> orderLines = event.orderLines();
 
         if (orderLines == null || orderLines.isEmpty()) {
@@ -47,6 +53,11 @@ public class ItemServiceEventConsumer {
 
     @KafkaListener(topics = "${app.kafka.topic.payment-failed}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumePaymentFailed(PaymentFailedEvent event) {
+        if (event == null) {
+            log.warn("payment-failed 이벤트가 null 입니다. 메시지를 무시합니다.");
+            return;
+        }
+
         if (event.orderLines() == null || event.orderLines().isEmpty()) {
             log.warn("복구할 주문 라인이 없어 재고 복구를 건너뜁니다. orderId={}, paymentId={}",
                 event.orderId(), event.paymentId());

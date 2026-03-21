@@ -17,6 +17,10 @@ public class PaymentServiceEventConsumer {
 
     @KafkaListener(topics = "${app.kafka.topic.payment-requested}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumePaymentRequested(PaymentRequestedEvent event) {
+        if (event == null) {
+            log.warn("payment-requested 이벤트가 null 입니다. 메시지를 무시합니다.");
+            return;
+        }
         paymentService.executePayment(event);
     }
 }

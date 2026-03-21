@@ -2,7 +2,6 @@ package io.philo.shop.presentation;
 
 import java.util.List;
 
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,6 +1,6 @@
 package io.philo.shop.testsupport;
 
-import static io.philo.shop.testsupport.ManualOrderServiceExceptionTrigger.FailureType.from;
+import static io.philo.shop.testsupport.ManualOrderServiceExceptionTrigger.FailureType.*;
 
 import org.springframework.beans.factory.annotation.Value;
 

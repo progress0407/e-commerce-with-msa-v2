@@ -1,6 +1,6 @@
 package io.philo.shop.messaging;
 
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 

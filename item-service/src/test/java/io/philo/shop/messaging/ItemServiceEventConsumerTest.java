@@ -5,19 +5,20 @@ import static org.mockito.Mockito.*;
 
 import java.util.List;
 
-import io.philo.shop.OrderCanceledEvent;
-import io.philo.shop.OrderCreatedEvent;
-import io.philo.shop.PaymentRequestedEvent;
-import io.philo.shop.exception.InvalidOrderQuantityException;
-import io.philo.shop.exception.ItemNotFoundForOrderException;
-import io.philo.shop.exception.InsufficientStockException;
-import io.philo.shop.service.ItemService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import io.philo.shop.OrderCanceledEvent;
+import io.philo.shop.OrderCreatedEvent;
+import io.philo.shop.PaymentRequestedEvent;
+import io.philo.shop.exception.InsufficientStockException;
+import io.philo.shop.exception.InvalidOrderQuantityException;
+import io.philo.shop.exception.ItemNotFoundForOrderException;
+import io.philo.shop.service.ItemService;
 
 @ExtendWith(MockitoExtension.class)
 class ItemServiceEventConsumerTest {

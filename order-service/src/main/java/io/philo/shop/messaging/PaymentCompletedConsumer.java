@@ -17,6 +17,10 @@ public class PaymentCompletedConsumer {
 
     @KafkaListener(topics = "${app.kafka.topic.payment-completed}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumePaymentCompleted(PaymentCompletedEvent event) {
+        if (event == null) {
+            log.warn("payment-completed 이벤트가 null 입니다. 메시지를 무시합니다.");
+            return;
+        }
         orderService.completeOrder(event.orderId());
         log.info("결제 완료 이벤트를 처리했습니다. orderId={}, paymentId={}",
                 event.orderId(),

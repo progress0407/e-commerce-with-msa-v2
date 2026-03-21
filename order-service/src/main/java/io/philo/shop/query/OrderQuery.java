@@ -5,8 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import io.philo.shop.domain.OrderEntity;
-import io.philo.shop.dto.web.OrderListResponse;
-import io.philo.shop.dto.web.OrderListResponses;
 import io.philo.shop.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 

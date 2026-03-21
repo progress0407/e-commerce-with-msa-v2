@@ -25,26 +25,23 @@ public class PaymentServiceEventProducer {
     private String paymentFailedTopic;
 
     public void publishPaymentCompleted(PaymentCompletedEvent event) {
-        try {
-            kafkaTemplate.send(paymentCompletedTopic, String.valueOf(event.orderId()), event).get();
-            log.info("결제 완료 이벤트를 발행했습니다. orderId={}, topic={}", event.orderId(), paymentCompletedTopic);
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("결제 완료 이벤트를 발행하는 중 인터럽트가 발생했습니다.", ex);
-        } catch (ExecutionException ex) {
-            throw new IllegalStateException("결제 완료 이벤트 발행에 실패했습니다.", ex);
-        }
+        sendAndWait(paymentCompletedTopic, String.valueOf(event.orderId()), event, "결제 완료 이벤트");
+        log.info("결제 완료 이벤트를 발행했습니다. orderId={}, topic={}", event.orderId(), paymentCompletedTopic);
     }
 
     public void publishPaymentFailed(PaymentFailedEvent event) {
+        sendAndWait(paymentFailedTopic, String.valueOf(event.orderId()), event, "결제 실패 이벤트");
+        log.info("결제 실패 이벤트를 발행했습니다. orderId={}, topic={}", event.orderId(), paymentFailedTopic);
+    }
+
+    private void sendAndWait(String topic, String key, Object payload, String eventName) {
         try {
-            kafkaTemplate.send(paymentFailedTopic, String.valueOf(event.orderId()), event).get();
-            log.info("결제 실패 이벤트를 발행했습니다. orderId={}, topic={}", event.orderId(), paymentFailedTopic);
+            kafkaTemplate.send(topic, key, payload).get();
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("결제 실패 이벤트를 발행하는 중 인터럽트가 발생했습니다.", ex);
+            throw new IllegalStateException(eventName + "를 발행하는 중 인터럽트가 발생했습니다.", ex);
         } catch (ExecutionException ex) {
-            throw new IllegalStateException("결제 실패 이벤트 발행에 실패했습니다.", ex);
+            throw new IllegalStateException(eventName + " 발행에 실패했습니다.", ex);
         }
     }
 }

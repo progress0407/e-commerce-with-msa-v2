@@ -1,9 +1,5 @@
 package io.philo.shop.ui;
 
-import java.util.List;
-import java.util.stream.Stream;
-
-import org.hibernate.boot.jaxb.mapping.GenerationTiming;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -17,6 +17,10 @@ public class PaymentFailedConsumer {
 
     @KafkaListener(topics = "${app.kafka.topic.payment-failed}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumePaymentFailed(PaymentFailedEvent event) {
+        if (event == null) {
+            log.warn("payment-failed 이벤트가 null 입니다. 메시지를 무시합니다.");
+            return;
+        }
         orderService.failOrder(event.orderId());
         log.info("결제 실패 이벤트를 처리했습니다. orderId={}, paymentId={}, resultCode={}",
                 event.orderId(),

@@ -5,17 +5,18 @@ import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import io.philo.shop.constant.OrderStatus;
 import io.philo.shop.domain.OrderEntity;
 import io.philo.shop.exception.OrderNotFoundForCancelException;
 import io.philo.shop.messaging.OrderEventProducer;
 import io.philo.shop.repository.OrderRepository;
 import io.philo.shop.testsupport.ManualOrderServiceExceptionTrigger;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
